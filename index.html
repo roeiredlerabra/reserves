@@ -17,13 +17,20 @@
             color: #1a1a1a;
         }
         main {
-            min-height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            padding: 1rem;
-            width: auto;
-        }
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: 1rem;
+    width: 100%;
+}
+
+h4 {
+    margin-bottom: 1rem; /* Adds space between the heading and the timeline */
+    font-size: 1.5rem;
+    text-align: center;
+}
         .timeline {
             padding: 3rem 2rem;
             max-width: 600px;
@@ -89,14 +96,104 @@
             margin-left: 10px;
             color: #4CAF50;
         }
+        header {
+    position: relative;
+    width: 100%;
+    background-color: #3471b3; /* Background color for the navbar */
+}
+
+.navbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 20px;
+    height: 60px;
+}
+
+.logo img {
+    width: 50px;
+    height: 50px;
+}
+
+.nav-links {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+}
+
+.nav-links li {
+    margin-left: 20px;
+}
+
+.nav-links a {
+    color: white;
+    text-decoration: none;
+    font-size: 16px;
+    transition: color 0.3s;
+}
+
+.nav-links a:hover {
+    color: #ddd;
+}
+
+.video-header {
+    position: relative;
+    width: 100%;
+    padding-bottom: 30%; /* 21:9 aspect ratio (9/21 = 0.4285) */
+    height: 0;
+    overflow: hidden;
+}
+
+.video-header video {
+    position: absolute;
+    bottom: 0; /* Align the video to the bottom */
+    left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: bottom; /* Show the bottom portion of the video */
+}
+
     </style>
 </head>
 <body>
+    <header>
+        <nav class="navbar">
+            <div class="logo">
+                <img src="https://www.iaf.org.il/Images/Shared/asset-5-2-x.png" alt="Logo">
+                <img src="/assets/432240585_122119788224216796_5147701547988005170_n.jpg" alt="Logo">
+                <img src="https://iron-swords.co.il/wp-content/uploads/2024/03/iron-swords-logo-red-back-UPSCALED.png" alt="Logo">
+            </div>
+            <ul class="nav-links">
+                <li hidden><a href="#">Home</a></li>
+                <li hidden><a href="#">About</a></li>
+                <li hidden><a href="#">Services</a></li>
+                <li hidden><a href="#">Contact</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <section class="video-header">
+        <video autoplay loop muted>
+            <source src="/assets/video.mp4" type="video/mp4">
+            Your browser does not support the video tag.
+        </video>
+    </section>
+
     <main>
+
+        <h4>
+            דיווחי מילואים
+            </h4>
+
         <div id="timeline" class="timeline">
             <!-- Timeline items will be inserted here -->
         </div>
     </main>
+
+
+
 
     <script>
         async function fetchTimelineData() {
