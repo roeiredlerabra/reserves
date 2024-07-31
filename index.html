@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dynamic Timeline</title>
+    <style>
+        *, *::after, *::before {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        body {
+            min-width: 375px;
+            font-family: Arial, sans-serif;
+            background-color: #f1f1f1;
+            color: #1a1a1a;
+        }
+        main {
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 1rem;
+            width: auto;
+        }
+        .timeline {
+            padding: 3rem 2rem;
+            max-width: 600px;
+            width: 100%;
+            border-radius: 12px;
+            background-color: white;
+            box-shadow: 0 4px 25px -20px rgba(0,0,0,0.2);
+        }
+        .tl-content .tl-header,
+        .tl-content .tl-body {
+            padding-left: 25.6px;
+            border-left: 3px solid #e0e0e0;
+        }
+        .tl-body {
+            padding-bottom: 1rem;
+        }
+        .tl-content:last-child .tl-body {
+            border-left: 3px solid transparent;
+        }
+        .tl-header {
+            position: relative;
+            display: grid;
+            padding-top: 1rem;
+            padding-bottom: 1rem;
+        }
+        .tl-title {
+            font-weight: 600;
+            font-size: 1em;
+            border-bottom: 1px solid #e0e0e0;
+            margin-bottom: 0.5rem;
+        }
+        .tl-time {
+            font-size: 0.8em;
+            color: #666;
+        }
+        .tl-marker {
+            display: block;
+            position: absolute;
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            background: #e0e0e0;
+            left: -1.1rem;
+            top: 50%;
+            transform: translate(50%,-50%);
+        }
+        .tl-content-active .tl-marker {
+            padding: 1.6px;
+            left: -1.25rem;
+            width: 18px;
+            height: 18px;
+            border: 2px solid #4CAF50;
+            background-color: #4CAF50;
+            background-clip: content-box;
+            box-shadow: 0 0 15px -2px #4CAF50;
+        }
+        .tl-content-active .tl-title {
+            font-weight: 700;
+            color: #2E7D32;
+        }
+        .download-icon {
+            cursor: pointer;
+            margin-left: 10px;
+            color: #4CAF50;
+        }
+    </style>
+</head>
+<body>
+    <main>
+        <div id="timeline" class="timeline">
+            <!-- Timeline items will be inserted here -->
+        </div>
+    </main>
+
+    <script>
+        async function fetchTimelineData() {
+            try {
+                const response = await fetch('https://prod-18.westeurope.logic.azure.com:443/workflows/d0ca22704b28416a8fbf2cbbbea93668/triggers/manual/paths/invoke?api-version=2016-06-01&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=qcIhZeeDjfDZ6EQQcQOPMyq96cONIdPGP4PJRXvct6Q', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    // Add any necessary body data here
+                    // body: JSON.stringify({}),
+                });
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                return await response.json();
+            } catch (error) {
+                console.error('Error fetching timeline data:', error);
+                return [];
+            }
+        }
+
+        function formatDate(dateString) {
+            const date = new Date(dateString);
+            return date.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+        }
+
+        function createTimelineItem(item, isActive) {
+            const startDate = formatDate(item.OData__x05ea__x05d0__x05e8__x05d9__x05);
+            const endDate = formatDate(item.OData__x05ea__x05d0__x05e8__x05d9__x050);
+            const hasAttachments = item['{HasAttachments}'] == true;
+            const downloadIcon = hasAttachments ? `
+  <span class="download-icon" id="download-icon-${item.ID}">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M12 16V4M8 12L12 16L16 12M4 20H20" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>
+  </span>
+` : '';
+
+            
+            return `
+                <div class="tl-content ${isActive ? 'tl-content-active' : ''}">
+                    <div class="tl-header">
+                        <span class="tl-marker"></span>
+                        <p class="tl-title">Name: ${item.Author.DisplayName}${downloadIcon}</p>
+                        <time class="tl-time" datetime="${item.OData__x05ea__x05d0__x05e8__x05d9__x05}">
+                            ${startDate} - ${endDate}
+                        </time>
+                    </div>
+                    <div class="tl-body">
+                        <p>Total days: ${item.OData__x05e1__x05d4__x05db__x05d9__x05}</p>
+                    </div>
+                </div>
+            `;
+        }
+
+        async function downloadAttachment(id) {
+            try {
+                const response = await fetch('https://prod-232.westeurope.logic.azure.com:443/workflows/d95f90590dad46cfb3f6fabcfc777d4d/triggers/manual/paths/invoke?api-version=2016-06-01&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=Zaci3OvngshX_jxn0Ps4oZEKRFLRCKTuZ621p3xG_eY', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ id }),
+                });
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                const blob = await response.blob();
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.style.display = 'none';
+                a.href = url;
+                a.download = `document_${id}.pdf`;  // Change the file extension if needed
+                document.body.appendChild(a);
+                a.click();
+                window.URL.revokeObjectURL(url);
+            } catch (error) {
+                console.error('Error downloading attachment:', error);
+            }
+        }
+
+        async function renderTimeline() {
+            const timelineElement = document.getElementById('timeline');
+            const timelineData = await fetchTimelineData();
+            
+            const sortedData = timelineData.sort((a, b) => 
+                new Date(b.OData__x05ea__x05d0__x05e8__x05d9__x05) - new Date(a.OData__x05ea__x05d0__x05e8__x05d9__x05)
+            );
+
+            timelineElement.innerHTML = sortedData.map((item, index) => 
+                createTimelineItem(item, index === 0)
+            ).join('');
+
+            sortedData.forEach(item => {
+                const iconElement = document.getElementById(`download-icon-${item.ID}`);
+                if (iconElement) {
+                    iconElement.addEventListener('click', () => downloadAttachment(item.ID));
+                }
+            });
+        }
+
+        renderTimeline();
+    </script>
+</body>
+</html>
