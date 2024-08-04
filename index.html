@@ -181,6 +181,12 @@ h4 {
         .tl-content-active .mini-calendar .day.highlighted {
             background-color: #2E7D32;
         }
+        .mini-calendar .day-header {
+    background-color: rgba(77, 77, 241, 0.489);
+    color: white;
+    text-align: center;
+}
+
     </style>
 </head>
 <body>
@@ -290,7 +296,7 @@ function createMonthCalendar(monthStart, eventEnd) {
     
     // Add day headers
     'SMTWTFS'.split('').forEach(day => {
-        calendarHTML += `<div class="day">${day}</div>`;
+        calendarHTML += `<div class="day day-header">${day}</div>`;
     });
 
     // Add empty cells for days before the 1st
