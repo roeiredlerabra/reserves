@@ -154,7 +154,33 @@ h4 {
     object-fit: cover;
     object-position: bottom; /* Show the bottom portion of the video */
 }
+.mini-calendar {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 2px;
+            margin-top: 10px;
+            font-size: 0.8em;
+        }
 
+        .mini-calendar .day {
+            text-align: center;
+            padding: 2px;
+            background-color: #f0f0f0;
+            border-radius: 2px;
+        }
+
+        .mini-calendar .day.highlighted {
+            background-color: #4CAF50;
+            color: white;
+        }
+
+        .mini-calendar .day.other-month {
+            opacity: 0.3;
+        }
+
+        .tl-content-active .mini-calendar .day.highlighted {
+            background-color: #2E7D32;
+        }
     </style>
 </head>
 <body>
@@ -221,18 +247,97 @@ h4 {
             return date.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
         }
 
+        function calculateDuration(startDate, endDate) {
+            const start = new Date(startDate);
+            const end = new Date(endDate);
+            return Math.ceil((end - start) / (1000 * 60 * 60 * 24)) + 1; // +1 to include both start and end days
+        }
+
+        function getMonthData(date) {
+    const year = date.getFullYear();
+    const month = date.getMonth();
+    const firstDay = new Date(year, month, 1);
+    const lastDay = new Date(year, month + 1, 0);
+    const daysInMonth = lastDay.getDate();
+    const startingDay = firstDay.getDay();
+    return { year, month, daysInMonth, startingDay };
+}
+
+function createMiniCalendar(startDate, endDate) {
+    const start = new Date(startDate);
+    const end = new Date(endDate);
+    
+    let calendarHTML = '<div class="mini-calendars-container">';
+    
+    // Create calendar for the start month
+    calendarHTML += createMonthCalendar(start, end);
+    
+    // If the event spans two months, create a calendar for the end month
+    if (start.getMonth() !== end.getMonth() || start.getFullYear() !== end.getFullYear()) {
+        calendarHTML += createMonthCalendar(new Date(end.getFullYear(), end.getMonth(), 1), end);
+    }
+    
+    calendarHTML += '</div>';
+    return calendarHTML;
+}
+
+function createMonthCalendar(monthStart, eventEnd) {
+    const monthData = getMonthData(monthStart);
+    let calendarHTML = '<div class="mini-calendar">';
+    
+    // Add month name
+    calendarHTML += `<div class="mini-calendar-month">${monthStart.toLocaleString('default', { month: 'long', year: 'numeric' })}</div>`;
+    
+    // Add day headers
+    'SMTWTFS'.split('').forEach(day => {
+        calendarHTML += `<div class="day">${day}</div>`;
+    });
+
+    // Add empty cells for days before the 1st
+    for (let i = 0; i < monthData.startingDay; i++) {
+        calendarHTML += '<div class="day other-month"></div>';
+    }
+
+    // Add days of the month
+    for (let day = 1; day <= monthData.daysInMonth; day++) {
+        const currentDate = new Date(monthData.year, monthData.month, day);
+
+        // Adjusted logic to ensure full-day highlighting
+        const isHighlighted = currentDate >= new Date(monthStart.setHours(0,0,0,0)) && 
+                              currentDate <= new Date(eventEnd.setHours(23,59,59,999));
+
+        const highlightClass = isHighlighted ? 'highlighted' : '';
+        calendarHTML += `<div class="day ${highlightClass}">${day}</div>`;
+    }
+
+    // Add empty cells for remaining days
+    const totalCells = 42; // 6 rows * 7 days
+    const remainingCells = totalCells - (monthData.startingDay + monthData.daysInMonth);
+    for (let i = 0; i < remainingCells; i++) {
+        calendarHTML += '<div class="day other-month"></div>';
+    }
+
+    calendarHTML += '</div>';
+    return calendarHTML;
+}
+
+
+
+
         function createTimelineItem(item, isActive) {
-            const startDate = formatDate(item.OData__x05ea__x05d0__x05e8__x05d9__x05);
-            const endDate = formatDate(item.OData__x05ea__x05d0__x05e8__x05d9__x050);
+            const startDate = new Date(item.OData__x05ea__x05d0__x05e8__x05d9__x05);
+            const endDate = new Date(item.OData__x05ea__x05d0__x05e8__x05d9__x050);
+            const duration = calculateDuration(startDate, endDate);
+            const miniCalendar = createMiniCalendar(startDate, endDate);
+
             const hasAttachments = item['{HasAttachments}'] == true;
             const downloadIcon = hasAttachments ? `
-  <span class="download-icon" id="download-icon-${item.ID}">
-    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <path d="M12 16V4M8 12L12 16L16 12M4 20H20" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-    </svg>
-  </span>
-` : '';
-
+                <span class="download-icon" id="download-icon-${item.ID}">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M12 16V4M8 12L12 16L16 12M4 20H20" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                </span>
+            ` : '';
             
             return `
                 <div class="tl-content ${isActive ? 'tl-content-active' : ''}">
@@ -240,15 +345,17 @@ h4 {
                         <span class="tl-marker"></span>
                         <p class="tl-title">Name: ${item.Author.DisplayName}${downloadIcon}</p>
                         <time class="tl-time" datetime="${item.OData__x05ea__x05d0__x05e8__x05d9__x05}">
-                            ${startDate} - ${endDate}
+                            ${formatDate(startDate)} - ${formatDate(endDate)}
                         </time>
                     </div>
                     <div class="tl-body">
-                        <p>Total days: ${item.OData__x05e1__x05d4__x05db__x05d9__x05}</p>
+                        <p>Total days: ${duration}</p>
+                        ${miniCalendar}
                     </div>
                 </div>
             `;
         }
+
 
     async function downloadAttachment(id) {
     try {
