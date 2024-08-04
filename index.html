@@ -235,6 +235,36 @@ header {
     color: white;
     text-align: center;
 }
+.day-header {
+    position: relative;
+    text-align: center;
+    padding: 0.5rem;
+    background-color: rgba(77, 77, 241, 0.489); /* Adjust to your design */
+    color: white;
+    font-size: 0.9rem; /* Adjust if needed */
+}
+
+.day-header::after {
+    content: attr(data-day);
+    position: absolute;
+    left: 50%;
+    bottom: 100%;
+    transform: translateX(-50%);
+    background-color: #333;
+    color: #fff;
+    padding: 0.3rem;
+    border-radius: 4px;
+    white-space: nowrap;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s;
+    font-size: 0.8rem; /* Adjust size if needed */
+}
+
+.day-header:hover::after {
+    opacity: 1;
+}
+
 
 
     </style>
@@ -347,10 +377,14 @@ function createMonthCalendar(monthStart, eventEnd) {
             <div class="mini-calendar">
     `;
     
-    // Add day headers
-    'SMTWTFS'.split('').forEach(day => {
-        calendarHTML += `<div class="day day-header">${day}</div>`;
-    });
+    const dayNames = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+
+// Add day headers
+dayNames.forEach((day, index) => {
+    const shortName = 'SMTWTFS'[index];
+    calendarHTML += `<div class="day day-header" data-day="${day}">${shortName}</div>`;
+});
+
 
     // Add empty cells for days before the 1st
     for (let i = 0; i < monthData.startingDay; i++) {
