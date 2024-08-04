@@ -5,18 +5,20 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dynamic Timeline</title>
     <style>
-        *, *::after, *::before {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-        }
-        body {
-            min-width: 375px;
-            font-family: Arial, sans-serif;
-            background-color: #f1f1f1;
-            color: #1a1a1a;
-        }
-        main {
+      *, *::after, *::before {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    min-width: 375px;
+    font-family: Arial, sans-serif;
+    background-color: #f1f1f1;
+    color: #1a1a1a;
+}
+
+main {
     min-height: 100vh;
     display: flex;
     flex-direction: column;
@@ -27,79 +29,105 @@
 }
 
 h4 {
-    margin-bottom: 1rem; /* Adds space between the heading and the timeline */
+    margin-bottom: 1rem;
     font-size: 1.5rem;
     text-align: center;
 }
-        .timeline {
-            padding: 3rem 2rem;
-            max-width: 740px;
-            width: 100%;
-            border-radius: 12px;
-            background-color: white;
-            box-shadow: 0 4px 25px -20px rgba(0,0,0,0.2);
-        }
-        .tl-content .tl-header,
-        .tl-content .tl-body {
-            padding-left: 25.6px;
-            border-left: 3px solid #e0e0e0;
-        }
-        .tl-body {
-            padding-bottom: 1rem;
-        }
-        .tl-content:last-child .tl-body {
-            border-left: 3px solid transparent;
-        }
-        .tl-header {
-            position: relative;
-            display: grid;
-            padding-top: 1rem;
-            padding-bottom: 1rem;
-        }
-        .tl-title {
-            font-weight: 600;
-            font-size: 1em;
-            border-bottom: 1px solid #e0e0e0;
-            margin-bottom: 0.5rem;
-        }
-        .tl-time {
-            font-size: 0.8em;
-            color: #666;
-        }
-        .tl-marker {
-            display: block;
-            position: absolute;
-            width: 16px;
-            height: 16px;
-            border-radius: 50%;
-            background: #e0e0e0;
-            left: -1.1rem;
-            top: 50%;
-            transform: translate(50%,-50%);
-        }
-        .tl-content-active .tl-marker {
-            padding: 1.6px;
-            left: -1.25rem;
-            width: 18px;
-            height: 18px;
-            border: 2px solid #4CAF50;
-            background-color: #4CAF50;
-            background-clip: content-box;
-            box-shadow: 0 0 15px -2px #4CAF50;
-        }
-        .tl-content-active .tl-title {
-            font-weight: 700;
-            color: #2E7D32;
-        }
-        .download-icon {
-            cursor: pointer;
-            margin-left: 10px;
-            color: #4CAF50;
-        }
-        header {
+
+.timeline {
+    padding: 3rem 2rem;
+    max-width: 740px;
+    width: 100%;
+    border-radius: 12px;
+    background-color: white;
+    box-shadow: 0 4px 25px -20px rgba(0,0,0,0.2);
+}
+
+.tl-content .tl-header,
+.tl-content .tl-body {
+    padding-left: 25.6px;
+    border-left: 3px solid #e0e0e0;
+}
+
+.tl-body {
+    padding-bottom: 1rem;
+}
+
+.tl-content:last-child .tl-body {
+    border-left: 3px solid transparent;
+}
+
+.tl-header {
+    position: relative;
+    display: grid;
+    padding-top: 1rem;
+    padding-bottom: 1rem;
+}
+
+.tl-title {
+    font-weight: 600;
+    font-size: 1em;
+    border-bottom: 1px solid #e0e0e0;
+    margin-bottom: 0.5rem;
+}
+
+.tl-time {
+    font-size: 0.8em;
+    color: #666;
+}
+
+.tl-marker {
+    display: block;
+    position: absolute;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background: #e0e0e0;
+    left: -1.1rem;
+    top: 50%;
+    transform: translate(50%, -50%);
+}
+
+.tl-content-active .tl-marker {
+    padding: 1.6px;
+    left: -1.25rem;
+    width: 18px;
+    height: 18px;
+    border: 2px solid #4CAF50;
+    background-color: #4CAF50;
+    background-clip: content-box;
+    box-shadow: 0 0 15px -2px #4CAF50;
+}
+
+.tl-content-active .tl-title {
+    font-weight: 700;
+    color: #2E7D32;
+}
+
+.tl-body p {
+    font-size: 1rem;
+    font-weight: 500;
+    color: #000000;
+    margin-bottom: 10px;
+    padding: 8px 16px;
+    /* background-color: #e4e9ef; */
+    border-radius: 6px;
+   
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+    text-align: center;
+    letter-spacing: 0.3px;
+}
+
+.download-icon {
+    cursor: pointer;
+    margin-left: 10px;
+    color: #4CAF50;
+}
+
+header {
     position: relative;
     width: 100%;
-    background-color: #3471b3; /* Background color for the navbar */
+    background-color: #3471b3;
 }
 
 .navbar {
@@ -140,52 +168,74 @@ h4 {
 .video-header {
     position: relative;
     width: 100%;
-    padding-bottom: 30%; /* 21:9 aspect ratio (9/21 = 0.4285) */
+    padding-bottom: 30%;
     height: 0;
     overflow: hidden;
 }
 
 .video-header video {
     position: absolute;
-    bottom: 0; /* Align the video to the bottom */
+    bottom: 0;
     left: 0;
     width: 100%;
     height: 100%;
     object-fit: cover;
-    object-position: bottom; /* Show the bottom portion of the video */
+    object-position: bottom;
 }
+
+.mini-calendar-wrapper {
+    background-color: #F5F5F5;
+    border-radius: 8px;
+    padding: 1rem;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    border: 1px solid #E0E0E0;
+    margin-bottom: 20px;
+}
+
+.mini-calendar-month {
+    font-weight: 600;
+    font-size: 0.8rem;
+    padding: 0.4rem 0.2rem;
+    text-align: center;
+    background-color: #4CAF50;
+    border-radius: 8px;
+    color: #FFFFFF;
+    margin-bottom: 12px;
+    letter-spacing: 0.5px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+    border: 1px solid #388E3C;
+    text-transform: uppercase;
+}
+
 .mini-calendar {
     display: grid;
     grid-template-columns: repeat(7, 1fr);
     gap: 4px;
-    margin-top: 10px;
     font-size: 0.9em;
-        }
+}
 
-        .mini-calendar .day {
-            text-align: center;
-            padding: 2px;
-            background-color: #f0f0f0;
-            border-radius: 2px;
-        }
+.mini-calendar .day {
+    text-align: center;
+    padding: 2px;
+    background-color: #f0f0f0;
+    border-radius: 2px;
+}
 
-        .mini-calendar .day.highlighted {
-            background-color: #4CAF50;
-            color: white;
-        }
+.mini-calendar .day.highlighted {
+    background-color: #4CAF50;
+    color: white;
+}
 
-        .mini-calendar .day.other-month {
-            opacity: 0.3;
-        }
+.mini-calendar .day.other-month {
+    opacity: 0.3;
+}
 
-        .tl-content-active .mini-calendar .day.highlighted {
-            background-color: #2E7D32;
-        }
-        .mini-calendar .day-header {
+.mini-calendar .day-header {
     background-color: rgba(77, 77, 241, 0.489);
     color: white;
     text-align: center;
 }
+
 
     </style>
 </head>
@@ -289,10 +339,13 @@ function createMiniCalendar(startDate, endDate) {
 
 function createMonthCalendar(monthStart, eventEnd) {
     const monthData = getMonthData(monthStart);
-    let calendarHTML = '<div class="mini-calendar">';
+    const monthName = monthStart.toLocaleString('default', { month: 'long', year: 'numeric' });
     
-    // Add month name
-    calendarHTML += `<div class="mini-calendar-month">${monthStart.toLocaleString('default', { month: 'long', year: 'numeric' })}</div>`;
+    let calendarHTML = `
+        <div class="mini-calendar-wrapper">
+            <div class="mini-calendar-month">${monthName}</div>
+            <div class="mini-calendar">
+    `;
     
     // Add day headers
     'SMTWTFS'.split('').forEach(day => {
@@ -307,11 +360,11 @@ function createMonthCalendar(monthStart, eventEnd) {
     // Add days of the month
     for (let day = 1; day <= monthData.daysInMonth; day++) {
         const currentDate = new Date(monthData.year, monthData.month, day);
-
+        
         // Adjusted logic to ensure full-day highlighting
         const isHighlighted = currentDate >= new Date(monthStart.setHours(0,0,0,0)) && 
                               currentDate <= new Date(eventEnd.setHours(23,59,59,999));
-
+                              
         const highlightClass = isHighlighted ? 'highlighted' : '';
         calendarHTML += `<div class="day ${highlightClass}">${day}</div>`;
     }
@@ -323,9 +376,10 @@ function createMonthCalendar(monthStart, eventEnd) {
         calendarHTML += '<div class="day other-month"></div>';
     }
 
-    calendarHTML += '</div>';
+    calendarHTML += '</div></div>'; // Close the mini-calendar div and the wrapper div
     return calendarHTML;
 }
+
 
 
 
@@ -338,12 +392,10 @@ function createMonthCalendar(monthStart, eventEnd) {
 
             const hasAttachments = item['{HasAttachments}'] == true;
             const downloadIcon = hasAttachments ? `
-                <span class="download-icon" id="download-icon-${item.ID}">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M12 16V4M8 12L12 16L16 12M4 20H20" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                    </svg>
-                </span>
-            ` : '';
+    <span class="download-icon" id="download-icon-${item.ID}">
+        <img src="assets/download.gif" alt="Download" width="20" height="20" />
+    </span>
+` : '';
             
             return `
                 <div class="tl-content ${isActive ? 'tl-content-active' : ''}">
