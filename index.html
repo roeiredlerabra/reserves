@@ -265,8 +265,64 @@ header {
     opacity: 1;
 }
 
+.calendar-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            padding: 3rem 2rem;
+    
+    width: 100%;
+    border-radius: 12px;
+    background-color: white;
+    box-shadow: 0 4px 25px -20px rgba(0,0,0,0.2);
+    padding: 3rem 2rem;
+    max-width: 740px;
+    width: 100%;
+        }
+        .month-calendar {
+            margin-bottom: 20px;
+        }
+        .colored-date {
+            background-color: #ffcccb;
+        }
+        table {
+            border-collapse: collapse;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: center;
+        }
+        .button-container {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 1.5rem;
+    gap: 10px;
+}
 
+#playButton,
+#timelineButton {
+    font-size: 18px;
+    padding: 10px 20px;
+    cursor: pointer;
+    border: none;
+    background-color: #4CAF50;
+    color: white;
+    border-radius: 6px;
+    transition: background-color 0.3s, transform 0.3s;
+}
 
+#playButton:hover,
+#timelineButton:hover {
+    background-color: #388E3C;
+    transform: scale(1.05);
+}
+
+#playButton:active,
+#timelineButton:active {
+    background-color: #2E7D32;
+    transform: scale(1);
+}
     </style>
 </head>
 <body>
@@ -291,6 +347,7 @@ header {
             <source src="https://github.com/roeiredlerabra/reserves/raw/main/assets/video.mp4" type="video/mp4">
             Your browser does not support the video tag.
         </video>
+        
     </section>
 
     <main>
@@ -298,19 +355,41 @@ header {
         <h4>
             דיווחי מילואים
             </h4>
-
+            <div class="button-container">
+                <button id="playButton">תצוגת יומן כללית</button>
+                <button id="timelineButton">תצוגת ציר זמן</button>
+            </div>
         <div id="timeline" class="timeline">
             <!-- Timeline items will be inserted here -->
         </div>
-        <div id="fullCalendar" class="full-calendar" style="display: none;">
-            <!-- Full-size calendar will be inserted here -->
-        </div>
+
+
+        <div id="calendar-container" class="calendar-container"></div>
     </main>
 
 
 
 
     <script>
+        // Get the buttons and containers by their IDs
+const playButton = document.getElementById('playButton');
+const timelineButton = document.getElementById('timelineButton');
+const timeline = document.getElementById('timeline');
+const calendarContainer = document.getElementById('calendar-container');
+
+// Add event listeners for button clicks
+playButton.addEventListener('click', () => {
+    // Hide the timeline and show the calendar container
+    timeline.style.display = 'none';
+    calendarContainer.style.display = 'flex';
+});
+
+timelineButton.addEventListener('click', () => {
+    // Hide the calendar container and show the timeline
+    calendarContainer.style.display = 'none';
+    timeline.style.display = 'block';
+});
+
         function getURLParameter(name) {
     const urlParams = new URLSearchParams(window.location.search);
     let paramValue = urlParams.get(name);
@@ -531,5 +610,106 @@ dayNames.forEach((day, index) => {
 
         renderTimeline();
     </script>
+        <script>
+            function getURLParameter(name) {
+    const urlParams = new URLSearchParams(window.location.search);
+    let paramValue = urlParams.get(name);
+
+    // Remove any surrounding quotes from the parameter value
+    if (paramValue) {
+        paramValue = paramValue.replace(/(^"|"$)/g, '');
+    }
+
+    return paramValue;
+}
+            async function fetchData() {
+                const employeeEmail = getURLParameter('employee');
+                const url = 'https://prod-18.westeurope.logic.azure.com:443/workflows/d0ca22704b28416a8fbf2cbbbea93668/triggers/manual/paths/invoke?api-version=2016-06-01&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=qcIhZeeDjfDZ6EQQcQOPMyq96cONIdPGP4PJRXvct6Q';
+                const response = await fetch(url, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        "employee": employeeEmail
+                    })
+                });
+                return await response.json();
+            }
+    
+            function createCalendar(year, month, coloredDates) {
+                const date = new Date(year, month - 1, 1);
+                const daysInMonth = new Date(year, month, 0).getDate();
+                const monthName = date.toLocaleString('default', { month: 'long' });
+    
+                let html = `<div class="month-calendar"><h2>${monthName} ${year}</h2><table>`;
+                html += '<tr><th>Sun</th><th>Mon</th><th>Tue</th><th>Wed</th><th>Thu</th><th>Fri</th><th>Sat</th></tr>';
+    
+                let day = 1;
+                for (let i = 0; i < 6; i++) {
+                    html += '<tr>';
+                    for (let j = 0; j < 7; j++) {
+                        if (i === 0 && j < date.getDay()) {
+                            html += '<td></td>';
+                        } else if (day > daysInMonth) {
+                            html += '<td></td>';
+                        } else {
+                            const currentDate = `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+                            const className = coloredDates.includes(currentDate) ? 'colored-date' : '';
+                            html += `<td class="${className}">${day}</td>`;
+                            day++;
+                        }
+                    }
+                    html += '</tr>';
+                    if (day > daysInMonth) break;
+                }
+    
+                html += '</table></div>';
+                return html;
+            }
+    
+            function getColoredDates(data) {
+                const coloredDates = [];
+                data.forEach(item => {
+                    const startDate = new Date(item.OData__x05ea__x05d0__x05e8__x05d9__x05);
+                    const endDate = new Date(item.OData__x05ea__x05d0__x05e8__x05d9__x050);
+                    const currentDate = new Date(startDate);
+    
+                    while (currentDate <= endDate) {
+                        coloredDates.push(currentDate.toISOString().split('T')[0]);
+                        currentDate.setDate(currentDate.getDate() + 1);
+                    }
+                });
+                return coloredDates;
+            }
+    
+            function getMonthsToDisplay(coloredDates) {
+                const months = new Set();
+                coloredDates.forEach(date => {
+                    const [year, month] = date.split('-');
+                    months.add(`${year}-${month}`);
+                });
+                return Array.from(months).sort();
+            }
+    
+            async function renderCalendars() {
+                const data = await fetchData();
+                const coloredDates = getColoredDates(data);
+                const monthsToDisplay = getMonthsToDisplay(coloredDates);
+                
+                let calendarsHtml = '';
+                monthsToDisplay.forEach(monthYear => {
+                    const [year, month] = monthYear.split('-');
+                    calendarsHtml += createCalendar(parseInt(year), parseInt(month), coloredDates);
+                });
+                
+                document.getElementById('calendar-container').innerHTML = calendarsHtml;
+            }
+    
+            document.addEventListener('DOMContentLoaded', () => {
+                const playButton = document.getElementById('playButton');
+                playButton.addEventListener('click', renderCalendars);
+            });
+        </script>
 </body>
 </html>
